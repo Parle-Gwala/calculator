@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CalcX | Smart Calculator</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, #243b55, transparent 40%),
+        radial-gradient(circle at bottom right, #16213e, transparent 45%),
+        #070b14;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 34px;
+    letter-spacing: 2px;
+}
+
+.header p {
+    color: #9ca9bd;
+    margin-top: 5px;
+}
+
+.calculator {
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 25px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px);
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.mode-buttons button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: #1e293b;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.mode-buttons button.active {
+    background: #6366f1;
+    color: white;
+    box-shadow: 0 0 15px rgba(99,102,241,0.5);
+}
+
+.display {
+    background: #050912;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 15px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+
+.expression {
+    color: #8492a6;
+    font-size: 15px;
+    min-height: 22px;
+    text-align: right;
+}
+
+.result {
+    font-size: 36px;
+    text-align: right;
+    margin-top: 5px;
+    word-break: break-all;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+button.key {
+    height: 60px;
+    border: none;
+    border-radius: 15px;
+    background: #1e293b;
+    color: white;
+    font-size: 19px;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+button.key:hover {
+    background: #334155;
+    transform: translateY(-2px);
+}
+
+button.key:active {
+    transform: scale(0.95);
+}
+
+.operator {
+    background: #312e81 !important;
+}
+
+.special {
+    background: #334155 !important;
+}
+
+.equals {
+    background: #6366f1 !important;
+    box-shadow: 0 0 15px rgba(99,102,241,0.4);
+}
+
+.clear {
+    background: #9f1239 !important;
+}
+
+.scientific {
+    display: none;
+}
+
+.scientific.show {
+    display: grid;
+}
+
+.scientific button {
+    font-size: 15px !important;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 15px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+@media (max-width: 450px) {
+    .calculator {
+        padding: 14px;
+    }
+
+    button.key {
+        height: 55px;
+        font-size: 17px;
+    }
+
+    .result {
+        font-size: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>CalcX</h1>
+        <p>Smart • Fast • Scientific</p>
+    </div>
+
+    <div class="calculator">
+
+        <div class="mode-buttons">
+            <button id="normalMode" class="active" onclick="setMode('normal')">
+                Normal
+            </button>
+
+            <button id="scientificMode" onclick="setMode('scientific')">
+                Scientific
+            </button>
+        </div>
+
+        <div class="display">
+            <div class="expression" id="expression"></div>
+            <div class="result" id="result">0</div>
+        </div>
+
+        <!-- SCIENTIFIC BUTTONS -->
+        <div class="buttons scientific" id="scientificButtons">
+
+            <button class="key special" onclick="calculateFunction('sin')">sin</button>
+            <button class="key special" onclick="calculateFunction('cos')">cos</button>
+            <button class="key special" onclick="calculateFunction('tan')">tan</button>
+            <button class="key special" onclick="calculateFunction('log')">log</button>
+
+            <button class="key special" onclick="calculateFunction('ln')">ln</button>
+            <button class="key special" onclick="calculateFunction('sqrt')">√</button>
+            <button class="key special" onclick="calculateFunction('square')">x²</button>
+            <button class="key special" onclick="calculateFunction('cube')">x³</button>
+
+            <button class="key special" onclick="insertValue('π')">π</button>
+            <button class="key special" onclick="insertValue('e')">e</button>
+            <button class="key special" onclick="insertValue('(')">(</button>
+            <button class="key special" onclick="insertValue(')')">)</button>
+
+        </div>
+
+        <!-- MAIN BUTTONS -->
+        <div class="buttons">
+
+            <button class="key clear" onclick="clearCalc()">AC</button>
+            <button class="key special" onclick="backspace()">⌫</button>
+            <button class="key special" onclick="percentage()">%</button>
+            <button class="key operator" onclick="insertValue('/')">÷</button>
+
+            <button class="key" onclick="insertValue('7')">7</button>
+            <button class="key" onclick="insertValue('8')">8</button>
+            <button class="key" onclick="insertValue('9')">9</button>
+            <button class="key operator" onclick="insertValue('*')">×</button>
+
+            <button class="key" onclick="insertValue('4')">4</button>
+            <button class="key" onclick="insertValue('5')">5</button>
+            <button class="key" onclick="insertValue('6')">6</button>
+            <button class="key operator" onclick="insertValue('-')">−</button>
+
+            <button class="key" onclick="insertValue('1')">1</button>
+            <button class="key" onclick="insertValue('2')">2</button>
+            <button class="key" onclick="insertValue('3')">3</button>
+            <button class="key operator" onclick="insertValue('+')">+</button>
+
+            <button class="key" onclick="insertValue('0')">0</button>
+            <button class="key" onclick="insertValue('.')">.</button>
+            <button class="key equals" onclick="calculate()">=</button>
+            <button class="key operator" onclick="insertValue('**')">^</button>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        CalcX © 2026 • Built with HTML, CSS & JavaScript
+    </div>
+
+</div>
+
+<script>
+
+let current = "";
+let expression = "";
+
+const resultDisplay = document.getElementById("result");
+const expressionDisplay = document.getElementById("expression");
+
+function updateDisplay() {
+    resultDisplay.textContent = current || "0";
+    expressionDisplay.textContent = expression;
+}
+
+function insertValue(value) {
+
+    if (value === "π") {
+        current += Math.PI;
+    }
+    else if (value === "e") {
+        current += Math.E;
+    }
+    else {
+        current += value;
+    }
+
+    updateDisplay();
+}
+
+function clearCalc() {
+    current = "";
+    expression = "";
+    updateDisplay();
+}
+
+function backspace() {
+    current = current.slice(0, -1);
+    updateDisplay();
+}
+
+function calculate() {
+
+    try {
+
+        if (!current) return;
+
+        expression = current;
+
+        let answer = eval(current);
+
+        if (!isFinite(answer)) {
+            throw new Error();
+        }
+
+        current = Number.isInteger(answer)
+            ? answer.toString()
+            : parseFloat(answer.toFixed(10)).toString();
+
+        updateDisplay();
+
+    } catch {
+        resultDisplay.textContent = "Error";
+    }
+}
+
+function percentage() {
+
+    try {
+        current = (eval(current) / 100).toString();
+        updateDisplay();
+    } catch {
+        resultDisplay.textContent = "Error";
+    }
+}
+
+function calculateFunction(type) {
+
+    try {
+
+        let number = eval(current);
+
+        let answer;
+
+        switch(type) {
+
+            case "sin":
+                answer = Math.sin(number * Math.PI / 180);
+                break;
+
+            case "cos":
+                answer = Math.cos(number * Math.PI / 180);
+                break;
+
+            case "tan":
+                answer = Math.tan(number * Math.PI / 180);
+                break;
+
+            case "log":
+                answer = Math.log10(number);
+                break;
+
+            case "ln":
+                answer = Math.log(number);
+                break;
+
+            case "sqrt":
+                answer = Math.sqrt(number);
+                break;
+
+            case "square":
+                answer = number ** 2;
+                break;
+
+            case "cube":
+                answer = number ** 3;
+                break;
+        }
+
+        expression = type + "(" + number + ")";
+
+        current = parseFloat(answer.toFixed(10)).toString();
+
+        updateDisplay();
+
+    } catch {
+        resultDisplay.textContent = "Error";
+    }
+}
+
+function setMode(mode) {
+
+    const scientificButtons =
+        document.getElementById("scientificButtons");
+
+    const normalButton =
+        document.getElementById("normalMode");
+
+    const scientificButton =
+        document.getElementById("scientificMode");
+
+    if (mode === "scientific") {
+
+        scientificButtons.classList.add("show");
+
+        scientificButton.classList.add("active");
+        normalButton.classList.remove("active");
+
+    } else {
+
+        scientificButtons.classList.remove("show");
+
+        normalButton.classList.add("active");
+        scientificButton.classList.remove("active");
+    }
+}
+
+/* Keyboard support */
+
+document.addEventListener("keydown", function(event) {
+
+    const key = event.key;
+
+    if (
+        (key >= "0" && key <= "9") ||
+        key === "+" ||
+        key === "-" ||
+        key === "*" ||
+        key === "/" ||
+        key === "." ||
+        key === "(" ||
+        key === ")" 
+    ) {
+
+        insertValue(key);
+
+    } else if (key === "Enter" || key === "=") {
+
+        calculate();
+
+    } else if (key === "Backspace") {
+
+        backspace();
+
+    } else if (key === "Escape") {
+
+        clearCalc();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
